@@ -1,0 +1,76 @@
+<html>
+<head>
+        <meta charset="UTF-8">
+        <title>Pantomime</title>
+        <style>
+body{
+    background-image: url('https://i.pinimg.com/736x/12/76/70/1276705b59ffa5377f8bef5193881003.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+}
+.center-text {
+            text-align: center;
+        }
+#welcomeTitle {
+            color: rgb(253, 253, 253);
+        }
+.chooseTime-field {
+            position: fixed;
+            margin-top: 10%;
+            left: 30%;
+            height: 20%;
+            width: 20%;
+            background-color: #4a838c;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: auto;
+        }
+
+    .chooseTime-field button{
+        position: relative;
+        left: 30%;
+        border-radius: 10%;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+    }
+
+
+        </style>
+        </head>
+        <body>
+            <br><h1 class="center-text" style="font-size: 30px; display: block;" id="welcomeTitle">Διαλέξτε τον χρόνο με τον οποίο θα διαγωνιστείτε!</h1>
+    <div class="chooseTime-field">
+    <input type="radio" id="45sec" name="time" value="45">
+    <label for="45sec">45 δευτερόλεπτα (2 bonus)</label><br><br>
+    
+    <input type="radio" id="60sec" name="time" value="60">
+    <label for="60sec">60 δευτερόλεπτα (1 bonus)</label><br><br>
+    
+    <input type="radio" id="90sec" name="time" value="90">
+    <label for="90sec">90 δευτερόλεπτα (Κανένα bonus)</label><br>
+    <br><button onclick="pagechange()">Επιλογή</button>
+    </div>
+    </body>
+    <script>
+     function pagechange() {
+            var timeSelected = document.querySelector('input[name="time"]:checked');
+            var params = new URLSearchParams(window.location.search);
+            var teamOneName = params.get('teamOne');
+            var teamTwoName = params.get('teamTwo');
+            
+            if (timeSelected) {
+                var timeValue = timeSelected.value;
+                // Προσθήκη των ονομάτων των ομάδων και του χρόνου στο URL για τη μετάβαση στο gameindex.html
+                window.location.href = "gameindex.html?time=" + timeValue + "&teamOne=" + encodeURIComponent(teamOneName) + "&teamTwo=" + encodeURIComponent(teamTwoName);
+            } else {
+                alert("Παρακαλώ επιλέξτε χρόνο πριν συνεχίσετε!");
+            }
+        }
+
+
+
+    </script>
+    </body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Pantomime</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding-top: 50px;
+        }
+        table {
+            margin: 0 auto;
+            width: 50%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        th {
+            background-color: #4a838c;
+            color: white;
+        }
+        .timer {
+            font-size: 48px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .word-display {
+            font-size: 36px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .choose-word-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4a838c;
+            color: #fff;
+            cursor: pointer;
+        }
+        .found-word-button, .lost-word-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            margin-left: 5px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .found-word-button {
+            background-color: #04ff00;
+            color: #fff;
+        }
+        .lost-word-button {
+            background-color: #ff0000;
+            color: #fff;
+        }
+        .choose-word-button:hover, .found-word-button:hover, .lost-word-button:hover {
+            background-color: #3a6a6f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Η ΛΕΞΗ ΕΙΝΑΙ:</h1>
+    <button class="choose-word-button" onclick="chooseRandomWord(), timershow()" id="showButton">Εμφάνιση λέξης</button>
+    <div class="word-display" id="randomWord"></div>
+    
+    <div class="timer" id="countdown"></div>
+    
+    <!-- Κουμπιά κάτω από το χρονόμετρο, τοποθετημένα στο κέντρο -->
+    <div id="actionButtons" style="margin-top: 20px;">
+        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint(),chooseRandomWord()">Το βρήκες!</button>
+        <button class="lost-word-button" style="display: none;" id="lostButton">Έχασες.</button>
+    </div>
+    <h2>Βαθμολογία Ομάδων</h2>
+    <table>
+        <thead>
+            <tr>
+                <th id="teamOneHeader">Ομάδα 1</th>
+                <th id="teamTwoHeader">Ομάδα 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="scoreTeam1">0</td>
+                <td id="scoreTeam2">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Λίστα με λέξεις
+        var words = ["μήλο", "πορτοκάλι", "μπανάνα", "σταφύλι", "κεράσι"];
+
+        // Λήψη παραμέτρων URL για τα ονόματα των ομάδων
+        var params = new URLSearchParams(window.location.search);
+        var teamOneName = params.get('teamOne') || 'Ομάδα 1';
+        var teamTwoName = params.get('teamTwo') || 'Ομάδα 2';
+
+        // Ενημέρωση των επικεφαλίδων των ομάδων στον πίνακα
+        document.getElementById('teamOneHeader').innerText = teamOneName;
+        document.getElementById('teamTwoHeader').innerText = teamTwoName;
+
+        // Μεταβλητή για την παρακολούθηση της τελευταίας ομάδας που πήρε πόντο
+        var lastTeam = 'scoreTeam2'; // Ξεκινάμε με την ομάδα 2 για να προσθέσουμε στην ομάδα 1 την πρώτη φορά
+
+        function chooseRandomWord() {
+            var randomIndex = Math.floor(Math.random() * words.length);
+            var selectedWord = words[randomIndex];
+            document.getElementById("randomWord").innerHTML = selectedWord;
+            document.getElementById("showButton").style.display = "none";
+            document.getElementById("foundButton").style.display = "inline-block"; 
+            document.getElementById("lostButton").style.display = "inline-block"; 
+        }
+
+        function timershow(test){
+            var countdownTime = parseInt(params.get('time'), 10) || 60;
+            
+            // Συνάρτηση που ενημερώνει τον χρονομετρητή κάθε δευτερόλεπτο
+            var countdownTimer = setInterval(function() {
+                // Ενημερώνουμε την εμφάνιση του χρονομετρητή
+                document.getElementById('countdown').innerHTML = countdownTime;
+
+                // Μειώνουμε τον χρόνο κατά ένα δευτερόλεπτο
+                countdownTime--;
+
+                // Αν ο χρονομετρητής φτάσει στο 0, σταματάμε την αντίστροφη μέτρηση
+                if (countdownTime < 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('countdown').innerHTML = "Τέλος χρόνου!";
+                }
+            }, 1000); // Εκτελείται κάθε 1000ms (1 δευτερόλεπτο)
+        }
+
+        function addPoint() {
+            // Επιλέγουμε την ομάδα που θα πάρει πόντο
+            var teamId = lastTeam === 'scoreTeam1' ? 'scoreTeam2' : 'scoreTeam1';
+
+            // Λαμβάνουμε το στοιχείο με βάση το ID
+            var scoreElement = document.getElementById(teamId);
+            
+            // Λαμβάνουμε την τρέχουσα τιμή του σκορ και την μετατρέπουμε σε αριθμό
+            var currentScore = parseInt(scoreElement.innerText);
+            
+            // Αυξάνουμε το σκορ κατά 1
+            scoreElement.innerText = currentScore + 1;
+
+            // Ενημέρωση της τελευταίας ομάδας που πήρε πόντο
+            lastTeam = teamId;
+        }
+    </script>
+</body>
+</html>
