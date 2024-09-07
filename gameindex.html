@@ -71,6 +71,7 @@
 </head>
 <body>
     <h2 id="currentTeam">Ομάδα: Ομάδα 1</h2>
+    <h2 id="roundsPlayedDisplay">Γύροι: 0</h2>
 
     <h1>Η ΛΕΞΗ ΕΙΝΑΙ:</h1>
     <button class="choose-word-button" onclick="chooseRandomWord(), timershow()" id="showButton">Εμφάνιση λέξης</button>
@@ -80,7 +81,7 @@
     
     <!-- Κουμπιά κάτω από το χρονόμετρο, τοποθετημένα στο κέντρο -->
     <div id="actionButtons" style="margin-top: 20px;">
-        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint()">Το βρήκες!</button>
+        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint(),hideButton()">Το βρήκες!</button>
         <button class="lost-word-button" style="display: none;" id="passButton" onclick="chooseRandomWord(), timershow()">Πάσο.</button>
         <button class="next-team-button" style="display: none;" id="nextButton" onclick="nextTeam()">Επόμενος</button>
     </div>
@@ -135,10 +136,11 @@
             "Αλλάζω ένα λάστιχο"
         ];
 
-        // Λήψη παραμέτρων URL για τα ονόματα των ομάδων
+        // Λήψη παραμέτρων URL για τα ονόματα των ομάδων και τους γύρους
         var params = new URLSearchParams(window.location.search);
         var teamOneName = params.get('teamOne') || 'Ομάδα 1';
         var teamTwoName = params.get('teamTwo') || 'Ομάδα 2';
+        var totalRounds = parseInt(params.get('rounds')) || 10;  // Αριθμός γύρων που επιλέχθηκε από τον χρήστη
 
         // Ενημέρωση των επικεφαλίδων των ομάδων στον πίνακα
         document.getElementById('teamOneHeader').innerText = teamOneName;
@@ -148,11 +150,41 @@
         var currentTeam = 'scoreTeam1'; // Ξεκινάμε με την ομάδα 1
         var countdownTime;
         var countdownTimer;
+        var roundsPlayed = 0; // Μεταβλητή για την καταγραφή των γύρων
 
         // Ενημέρωση του ονόματος της τρέχουσας ομάδας
         function updateCurrentTeam() {
             var currentTeamName = currentTeam === 'scoreTeam1' ? teamOneName : teamTwoName;
             document.getElementById("currentTeam").innerText = "Ομάδα: " + currentTeamName;
+        }
+
+        function updateRoundsPlayed() {
+            document.getElementById("roundsPlayedDisplay").innerText = "Γύροι: " + roundsPlayed;
+        }
+
+        function checkGameEnd() {
+            if (roundsPlayed >= totalRounds) {
+                // Τέλος παιχνιδιού, ανακήρυξη νικητή
+                var scoreTeam1 = parseInt(document.getElementById('scoreTeam1').innerText);
+                var scoreTeam2 = parseInt(document.getElementById('scoreTeam2').innerText);
+                var winner;
+
+                if (scoreTeam1 > scoreTeam2) {
+                    winner = teamOneName;
+                } else if (scoreTeam2 > scoreTeam1) {
+                    winner = teamTwoName;
+                } else {
+                    winner = "Ισοπαλία!";
+                }
+
+                alert("Το παιχνίδι τελείωσε! Νικητής: " + winner);
+                // Απενεργοποίηση κουμπιών και τερματισμός παιχνιδιού
+                document.getElementById("foundButton").style.display = "none";
+                document.getElementById("nextButton").style.display = "none";
+                document.getElementById("passButton").style.display = "none";
+                return true;
+            }
+            return false;
         }
 
         function chooseRandomWord() {
@@ -216,6 +248,17 @@
             // Εναλλαγή της ομάδας
             currentTeam = currentTeam === 'scoreTeam1' ? 'scoreTeam2' : 'scoreTeam1';
 
+            // Αν η τρέχουσα ομάδα είναι η Ομάδα 2, αυξάνουμε τον αριθμό των γύρων
+            if (currentTeam === 'scoreTeam1') {
+                roundsPlayed++;
+                updateRoundsPlayed(); // Ενημερώνουμε την εμφάνιση των γύρων
+
+                // Έλεγχος αν το παιχνίδι έχει τελειώσει
+                if (checkGameEnd()) {
+                    return;
+                }
+            }
+
             // Ενημέρωση του ονόματος της τρέχουσας ομάδας
             updateCurrentTeam();
 
@@ -224,8 +267,12 @@
             timershow();
         }
 
-        // Κατά την αρχική φόρτωση της σελίδας, εμφανίζουμε την πρώτη ομάδα
+        // Κατά την αρχική φόρτωση της σελίδας, εμφανίζουμε την πρώτη ομάδα και τους γύρους
         updateCurrentTeam();
+        updateRoundsPlayed();
+        function hideButton(){
+            document.getElementById("foundButton").style.display = "none"; 
+        }
     </script>
 </body>
 </html>
