@@ -42,7 +42,7 @@
             color: #fff;
             cursor: pointer;
         }
-        .found-word-button, .lost-word-button {
+        .found-word-button, .lost-word-button,.next-team-button {
             font-size: 18px;
             padding: 10px 20px;
             border: none;
@@ -60,12 +60,18 @@
             background-color: #ff0000;
             color: #fff;
         }
+        .next-team-button {
+            background-color: #1900ff;
+            color: #fff;
+        }
         .choose-word-button:hover, .found-word-button:hover, .lost-word-button:hover {
             background-color: #3a6a6f;
         }
     </style>
 </head>
 <body>
+    <h2 id="currentTeam">Ομάδα: Ομάδα 1</h2>
+
     <h1>Η ΛΕΞΗ ΕΙΝΑΙ:</h1>
     <button class="choose-word-button" onclick="chooseRandomWord(), timershow()" id="showButton">Εμφάνιση λέξης</button>
     <div class="word-display" id="randomWord"></div>
@@ -74,8 +80,9 @@
     
     <!-- Κουμπιά κάτω από το χρονόμετρο, τοποθετημένα στο κέντρο -->
     <div id="actionButtons" style="margin-top: 20px;">
-        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint(),chooseRandomWord()">Το βρήκες!</button>
-        <button class="lost-word-button" style="display: none;" id="lostButton">Έχασες.</button>
+        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint()">Το βρήκες!</button>
+        <button class="lost-word-button" style="display: none;" id="passButton" onclick="chooseRandomWord(), timershow()">Πάσο.</button>
+        <button class="next-team-button" style="display: none;" id="nextButton" onclick="nextTeam()">Επόμενος</button>
     </div>
     <h2>Βαθμολογία Ομάδων</h2>
     <table>
@@ -106,8 +113,16 @@
         document.getElementById('teamOneHeader').innerText = teamOneName;
         document.getElementById('teamTwoHeader').innerText = teamTwoName;
 
-        // Μεταβλητή για την παρακολούθηση της τελευταίας ομάδας που πήρε πόντο
-        var lastTeam = 'scoreTeam2'; // Ξεκινάμε με την ομάδα 2 για να προσθέσουμε στην ομάδα 1 την πρώτη φορά
+        // Μεταβλητή για την παρακολούθηση της τρέχουσας ομάδας
+        var currentTeam = 'scoreTeam1'; // Ξεκινάμε με την ομάδα 1
+        var countdownTime;
+        var countdownTimer;
+
+        // Ενημέρωση του ονόματος της τρέχουσας ομάδας
+        function updateCurrentTeam() {
+            var currentTeamName = currentTeam === 'scoreTeam1' ? teamOneName : teamTwoName;
+            document.getElementById("currentTeam").innerText = "Ομάδα: " + currentTeamName;
+        }
 
         function chooseRandomWord() {
             var randomIndex = Math.floor(Math.random() * words.length);
@@ -115,14 +130,14 @@
             document.getElementById("randomWord").innerHTML = selectedWord;
             document.getElementById("showButton").style.display = "none";
             document.getElementById("foundButton").style.display = "inline-block"; 
-            document.getElementById("lostButton").style.display = "inline-block"; 
+            document.getElementById("nextButton").style.display = "inline-block"; 
         }
 
-        function timershow(test){
-            var countdownTime = parseInt(params.get('time'), 10) || 60;
+        function timershow(){
+            countdownTime = parseInt(params.get('time'), 10) || 60;
             
             // Συνάρτηση που ενημερώνει τον χρονομετρητή κάθε δευτερόλεπτο
-            var countdownTimer = setInterval(function() {
+            countdownTimer = setInterval(function() {
                 // Ενημερώνουμε την εμφάνιση του χρονομετρητή
                 document.getElementById('countdown').innerHTML = countdownTime;
 
@@ -139,20 +154,39 @@
 
         function addPoint() {
             // Επιλέγουμε την ομάδα που θα πάρει πόντο
-            var teamId = lastTeam === 'scoreTeam1' ? 'scoreTeam2' : 'scoreTeam1';
-
-            // Λαμβάνουμε το στοιχείο με βάση το ID
-            var scoreElement = document.getElementById(teamId);
+            var scoreElement = document.getElementById(currentTeam);
             
             // Λαμβάνουμε την τρέχουσα τιμή του σκορ και την μετατρέπουμε σε αριθμό
             var currentScore = parseInt(scoreElement.innerText);
             
-            // Αυξάνουμε το σκορ κατά 1
-            scoreElement.innerText = currentScore + 1;
+            // Αυξάνουμε το σκορ ανάλογα με τον απομένοντα χρόνο
+            scoreElement.innerText = currentScore + countdownTime + 1;
 
-            // Ενημέρωση της τελευταίας ομάδας που πήρε πόντο
-            lastTeam = teamId;
+            // Σταματάμε τον χρονομετρητή όταν πατηθεί το κουμπί "Το βρήκες!"
+            clearInterval(countdownTimer);  
         }
+
+        function stoptime(){
+            clearInterval(countdownTimer);
+        }
+
+        function nextTeam() {
+            // Σταματάμε τον χρονομετρητή
+            stoptime();
+
+            // Εναλλαγή της ομάδας
+            currentTeam = currentTeam === 'scoreTeam1' ? 'scoreTeam2' : 'scoreTeam1';
+
+            // Ενημέρωση του ονόματος της τρέχουσας ομάδας
+            updateCurrentTeam();
+
+            // Ξεκινάμε νέα λέξη και χρονόμετρο
+            chooseRandomWord();
+            timershow();
+        }
+
+        // Κατά την αρχική φόρτωση της σελίδας, εμφανίζουμε την πρώτη ομάδα
+        updateCurrentTeam();
     </script>
 </body>
 </html>
