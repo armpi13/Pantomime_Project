@@ -42,7 +42,7 @@
             color: #fff;
             cursor: pointer;
         }
-        .found-word-button, .lost-word-button,.next-team-button {
+        .found-word-button, .lost-word-button, .next-team-button {
             font-size: 18px;
             padding: 10px 20px;
             border: none;
@@ -102,7 +102,38 @@
 
     <script>
         // Λίστα με λέξεις
-        var words = ["μήλο", "πορτοκάλι", "μπανάνα", "σταφύλι", "κεράσι"];
+        var words = [
+            "Πηγαίνω στο σχολείο",
+            "Βάφω τον τοίχο",
+            "Διαβάζω ένα βιβλίο",
+            "Παίζω με τη γάτα",
+            "Τρέχω στο πάρκο",
+            "Μαγειρεύω στην κουζίνα",
+            "Οδηγώ το αυτοκίνητο",
+            "Τραγουδάω στο μπάνιο",
+            "Πίνω καφέ με φίλους",
+            "Παίζω ποδόσφαιρο",
+            "Βγάζω βόλτα τον σκύλο",
+            "Κάνω γυμναστική στο σπίτι",
+            "Φτιάχνω ένα παζλ",
+            "Παρακολουθώ μια ταινία",
+            "Ψάχνω τα κλειδιά μου",
+            "Πηγαίνω σούπερ μάρκετ",
+            "Παίζω με το μωρό",
+            "Κάνω βουτιά στη θάλασσα",
+            "Ανεβαίνω στο βουνό",
+            "Γράφω στον υπολογιστή",
+            "Καθαρίζω το σπίτι",
+            "Οδηγώ ποδήλατο",
+            "Παίζω μπάσκετ",
+            "Φτιάχνω το κρεβάτι",
+            "Μιλάω στο τηλέφωνο",
+            "Σκουπίζω με την ηλεκτρική σκούπα",
+            "Χορεύω στη μουσική",
+            "Κουρεύω το γρασίδι",
+            "Περιμένω το λεωφορείο",
+            "Αλλάζω ένα λάστιχο"
+        ];
 
         // Λήψη παραμέτρων URL για τα ονόματα των ομάδων
         var params = new URLSearchParams(window.location.search);
@@ -125,9 +156,19 @@
         }
 
         function chooseRandomWord() {
+            if (words.length === 0) {
+                document.getElementById("randomWord").innerHTML = "Δεν υπάρχουν άλλες λέξεις!";
+                document.getElementById("showButton").style.display = "none";
+                return;
+            }
+
             var randomIndex = Math.floor(Math.random() * words.length);
             var selectedWord = words[randomIndex];
             document.getElementById("randomWord").innerHTML = selectedWord;
+
+            // Αφαίρεση της λέξης από τη λίστα
+            words.splice(randomIndex, 1);
+
             document.getElementById("showButton").style.display = "none";
             document.getElementById("foundButton").style.display = "inline-block"; 
             document.getElementById("nextButton").style.display = "inline-block"; 
@@ -138,15 +179,13 @@
             
             // Συνάρτηση που ενημερώνει τον χρονομετρητή κάθε δευτερόλεπτο
             countdownTimer = setInterval(function() {
-                // Ενημερώνουμε την εμφάνιση του χρονομετρητή
                 document.getElementById('countdown').innerHTML = countdownTime;
-
-                // Μειώνουμε τον χρόνο κατά ένα δευτερόλεπτο
                 countdownTime--;
 
                 // Αν ο χρονομετρητής φτάσει στο 0, σταματάμε την αντίστροφη μέτρηση
                 if (countdownTime < 0) {
                     clearInterval(countdownTimer);
+                    document.getElementById("foundButton").style.display = "none"; 
                     document.getElementById('countdown').innerHTML = "Τέλος χρόνου!";
                 }
             }, 1000); // Εκτελείται κάθε 1000ms (1 δευτερόλεπτο)
