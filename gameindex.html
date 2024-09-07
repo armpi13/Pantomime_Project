@@ -178,6 +178,7 @@
                 }
 
                 alert("Το παιχνίδι τελείωσε! Νικητής: " + winner);
+                saveScoresToFile(scoreTeam1, scoreTeam2, winner);
                 // Απενεργοποίηση κουμπιών και τερματισμός παιχνιδιού
                 document.getElementById("foundButton").style.display = "none";
                 document.getElementById("nextButton").style.display = "none";
@@ -186,7 +187,19 @@
             }
             return false;
         }
+        function saveScoresToFile(scoreTeam1, scoreTeam2, winner) {
+            var content = "Αποτελέσματα παιχνιδιού:\n\n";
+            content += "Ομάδα 1 (" + teamOneName + "): " + scoreTeam1 + " πόντοι\n";
+            content += "Ομάδα 2 (" + teamTwoName + "): " + scoreTeam2 + " πόντοι\n";
+            content += "Νικητής: " + winner + "\n";
 
+            // Δημιουργία ενός blob για να κατεβάσουμε το αρχείο
+            var blob = new Blob([content], { type: 'text/plain' });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'scores.txt';
+            link.click();
+        }
         function chooseRandomWord() {
             if (words.length === 0) {
                 document.getElementById("randomWord").innerHTML = "Δεν υπάρχουν άλλες λέξεις!";
