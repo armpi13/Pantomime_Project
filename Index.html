@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pantomime</title>
+    <style>
+        .center-text {
+            text-align: center;
+        }
+        .teamsNames-field {
+            position: fixed;
+            margin-top: 10%;
+            left: 20%;
+            height: 18%;
+            width: 15%;
+            background-color: #26adc2;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .teamsName-fieldInput input {
+            flex: 1;
+            background-color: #e9e9e9;
+            color: #000000;
+            margin-top: 2px;
+            margin-bottom: 4px;
+            margin-right: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+        .teamsName button {
+            position: relative;
+            left: 30%;
+            border-radius: 10%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        body {
+            background-image: url("https://uploads.dailydot.com/2023/05/beetlejuice-just-hangng-around.jpg?auto=compress&fm=pjpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        #welcomeTitle {
+            color: rgb(253, 253, 253);
+        }
+    </style>
+</head>
+<body>
+    <h1 class="center-text" style="font-size: 30px; display: block;" id="welcomeTitle">Καλώς ήρθατε στο παιχνίδι παντομίμας!</h1>
+    <div class="teamsNames-field">
+        <div class="teamsName-fieldInput">
+            <label for="teamOneName" style="font-size: 15px">Ομάδα πρώτη</label><br>
+            <input type="text" id="teamOneName"><br>
+            <label for="teamTwoName" style="font-size: 15px">Ομάδα δεύτερη</label><br>
+            <input type="text" id="teamTwoName"><br><br>
+            <div class="teamsName">
+                <button onclick="createTeams()">Δημιουργία</button>
+                <button onclick="clearTeamOne()">Διαγραφή</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function clearTeamOne() {
+            document.getElementById("teamOneName").value = "";
+            document.getElementById("teamTwoName").value = "";
+        }
+
+        function createTeams() {
+           var teamOneName = document.getElementById("teamOneName").value;
+           var teamTwoName = document.getElementById("teamTwoName").value;
+           if (teamOneName.length === 0 || teamTwoName.length === 0) {
+                alert("Παρακαλώ συμπληρώστε και τα δύο ονόματα των ομάδων.");
+           } else {
+                window.location.href = "timer.html?teamOne=" + encodeURIComponent(teamOneName) + "&teamTwo=" + encodeURIComponent(teamTwoName);
+           }
+        }
+    </script>
+</body>
+</html>

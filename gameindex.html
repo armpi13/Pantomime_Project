@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Pantomime</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding-top: 50px;
+        }
+        table {
+            margin: 0 auto;
+            width: 50%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        th {
+            background-color: #4a838c;
+            color: white;
+        }
+        .timer {
+            font-size: 48px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .word-display {
+            font-size: 36px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .choose-word-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4a838c;
+            color: #fff;
+            cursor: pointer;
+        }
+        .found-word-button, .lost-word-button, .next-team-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            margin-left: 5px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .found-word-button {
+            background-color: #04ff00;
+            color: #fff;
+        }
+        .lost-word-button {
+            background-color: #ff0000;
+            color: #fff;
+        }
+        .next-team-button {
+            background-color: #1900ff;
+            color: #fff;
+        }
+        .choose-word-button:hover, .found-word-button:hover, .lost-word-button:hover {
+            background-color: #3a6a6f;
+        }
+    </style>
+</head>
+<body>
+    <h2 id="currentTeam">Ομάδα: Ομάδα 1</h2>
+    <h2 id="roundsPlayedDisplay">Γύροι: 0</h2>
+
+    <h1>Η ΛΕΞΗ ΕΙΝΑΙ:</h1>
+    <button class="choose-word-button" onclick="chooseRandomWord(), timershow()" id="showButton">Εμφάνιση λέξης</button>
+    <div class="word-display" id="randomWord"></div>
+    
+    <div class="timer" id="countdown"></div>
+    
+    <!-- Κουμπιά κάτω από το χρονόμετρο, τοποθετημένα στο κέντρο -->
+    <div id="actionButtons" style="margin-top: 20px;">
+        <button class="found-word-button" style="display: none;" id="foundButton" onclick="addPoint(),hideButton()">Το βρήκες!</button>
+        <button class="lost-word-button" style="display: none;" id="passButton" onclick="chooseRandomWord(), timershow()">Πάσο.</button>
+        <button class="next-team-button" style="display: none;" id="nextButton" onclick="nextTeam()">Επόμενος</button>
+    </div>
+    <h2>Βαθμολογία Ομάδων</h2>
+    <table>
+        <thead>
+            <tr>
+                <th id="teamOneHeader">Ομάδα 1</th>
+                <th id="teamTwoHeader">Ομάδα 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="scoreTeam1">0</td>
+                <td id="scoreTeam2">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Λίστα με λέξεις
+        var words = [
+            "Πηγαίνω στο σχολείο",
+            "Βάφω τον τοίχο",
+            "Διαβάζω ένα βιβλίο",
+            "Παίζω με τη γάτα",
+            "Τρέχω στο πάρκο",
+            "Μαγειρεύω στην κουζίνα",
+            "Οδηγώ το αυτοκίνητο",
+            "Τραγουδάω στο μπάνιο",
+            "Πίνω καφέ με φίλους",
+            "Παίζω ποδόσφαιρο",
+            "Βγάζω βόλτα τον σκύλο",
+            "Κάνω γυμναστική στο σπίτι",
+            "Φτιάχνω ένα παζλ",
+            "Παρακολουθώ μια ταινία",
+            "Ψάχνω τα κλειδιά μου",
+            "Πηγαίνω σούπερ μάρκετ",
+            "Παίζω με το μωρό",
+            "Κάνω βουτιά στη θάλασσα",
+            "Ανεβαίνω στο βουνό",
+            "Γράφω στον υπολογιστή",
+            "Καθαρίζω το σπίτι",
+            "Οδηγώ ποδήλατο",
+            "Παίζω μπάσκετ",
+            "Φτιάχνω το κρεβάτι",
+            "Μιλάω στο τηλέφωνο",
+            "Σκουπίζω με την ηλεκτρική σκούπα",
+            "Χορεύω στη μουσική",
+            "Κουρεύω το γρασίδι",
+            "Περιμένω το λεωφορείο",
+            "Αλλάζω ένα λάστιχο"
+        ];
+
+        // Λήψη παραμέτρων URL για τα ονόματα των ομάδων και τους γύρους
+        var params = new URLSearchParams(window.location.search);
+        var teamOneName = params.get('teamOne') || 'Ομάδα 1';
+        var teamTwoName = params.get('teamTwo') || 'Ομάδα 2';
+        var totalRounds = parseInt(params.get('rounds')) || 10;  // Αριθμός γύρων που επιλέχθηκε από τον χρήστη
+
+        // Ενημέρωση των επικεφαλίδων των ομάδων στον πίνακα
+        document.getElementById('teamOneHeader').innerText = teamOneName;
+        document.getElementById('teamTwoHeader').innerText = teamTwoName;
+
+        // Μεταβλητή για την παρακολούθηση της τρέχουσας ομάδας
+        var currentTeam = 'scoreTeam1'; // Ξεκινάμε με την ομάδα 1
+        var countdownTime;
+        var countdownTimer;
+        var roundsPlayed = 0; // Μεταβλητή για την καταγραφή των γύρων
+
+        // Ενημέρωση του ονόματος της τρέχουσας ομάδας
+        function updateCurrentTeam() {
+            var currentTeamName = currentTeam === 'scoreTeam1' ? teamOneName : teamTwoName;
+            document.getElementById("currentTeam").innerText = "Ομάδα: " + currentTeamName;
+        }
+
+        function updateRoundsPlayed() {
+            document.getElementById("roundsPlayedDisplay").innerText = "Γύροι: " + roundsPlayed;
+        }
+
+        function checkGameEnd() {
+            if (roundsPlayed >= totalRounds) {
+                // Τέλος παιχνιδιού, ανακήρυξη νικητή
+                var scoreTeam1 = parseInt(document.getElementById('scoreTeam1').innerText);
+                var scoreTeam2 = parseInt(document.getElementById('scoreTeam2').innerText);
+                var winner;
+
+                if (scoreTeam1 > scoreTeam2) {
+                    winner = teamOneName;
+                } else if (scoreTeam2 > scoreTeam1) {
+                    winner = teamTwoName;
+                } else {
+                    winner = "Ισοπαλία!";
+                }
+
+                alert("Το παιχνίδι τελείωσε! Νικητής: " + winner);
+                saveScoresToFile(scoreTeam1, scoreTeam2, winner);
+                // Απενεργοποίηση κουμπιών και τερματισμός παιχνιδιού
+                document.getElementById("foundButton").style.display = "none";
+                document.getElementById("nextButton").style.display = "none";
+                document.getElementById("passButton").style.display = "none";
+                return true;
+            }
+            return false;
+        }
+        function saveScoresToFile(scoreTeam1, scoreTeam2, winner) {
+            var content = "Αποτελέσματα παιχνιδιού:\n\n";
+            content += "Ομάδα 1 (" + teamOneName + "): " + scoreTeam1 + " πόντοι\n";
+            content += "Ομάδα 2 (" + teamTwoName + "): " + scoreTeam2 + " πόντοι\n";
+            content += "Νικητής: " + winner + "\n";
+
+            // Δημιουργία ενός blob για να κατεβάσουμε το αρχείο
+            var blob = new Blob([content], { type: 'text/plain' });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'scores.txt';
+            link.click();
+        }
+        function chooseRandomWord() {
+            if (words.length === 0) {
+                document.getElementById("randomWord").innerHTML = "Δεν υπάρχουν άλλες λέξεις!";
+                document.getElementById("showButton").style.display = "none";
+                return;
+            }
+
+            var randomIndex = Math.floor(Math.random() * words.length);
+            var selectedWord = words[randomIndex];
+            document.getElementById("randomWord").innerHTML = selectedWord;
+
+            // Αφαίρεση της λέξης από τη λίστα
+            words.splice(randomIndex, 1);
+
+            document.getElementById("showButton").style.display = "none";
+            document.getElementById("foundButton").style.display = "inline-block"; 
+            document.getElementById("nextButton").style.display = "inline-block"; 
+        }
+
+        function timershow(){
+            countdownTime = parseInt(params.get('time'), 10) || 60;
+            
+            // Συνάρτηση που ενημερώνει τον χρονομετρητή κάθε δευτερόλεπτο
+            countdownTimer = setInterval(function() {
+                document.getElementById('countdown').innerHTML = countdownTime;
+                countdownTime--;
+
+                // Αν ο χρονομετρητής φτάσει στο 0, σταματάμε την αντίστροφη μέτρηση
+                if (countdownTime < 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById("foundButton").style.display = "none"; 
+                    document.getElementById('countdown').innerHTML = "Τέλος χρόνου!";
+                }
+            }, 1000); // Εκτελείται κάθε 1000ms (1 δευτερόλεπτο)
+        }
+
+        function addPoint() {
+            // Επιλέγουμε την ομάδα που θα πάρει πόντο
+            var scoreElement = document.getElementById(currentTeam);
+            
+            // Λαμβάνουμε την τρέχουσα τιμή του σκορ και την μετατρέπουμε σε αριθμό
+            var currentScore = parseInt(scoreElement.innerText);
+            
+            // Αυξάνουμε το σκορ ανάλογα με τον απομένοντα χρόνο
+            scoreElement.innerText = currentScore + countdownTime + 1;
+
+            // Σταματάμε τον χρονομετρητή όταν πατηθεί το κουμπί "Το βρήκες!"
+            clearInterval(countdownTimer);  
+        }
+
+        function stoptime(){
+            clearInterval(countdownTimer);
+        }
+
+        function nextTeam() {
+            // Σταματάμε τον χρονομετρητή
+            stoptime();
+
+            // Εναλλαγή της ομάδας
+            currentTeam = currentTeam === 'scoreTeam1' ? 'scoreTeam2' : 'scoreTeam1';
+
+            // Αν η τρέχουσα ομάδα είναι η Ομάδα 2, αυξάνουμε τον αριθμό των γύρων
+            if (currentTeam === 'scoreTeam1') {
+                roundsPlayed++;
+                updateRoundsPlayed(); // Ενημερώνουμε την εμφάνιση των γύρων
+
+                // Έλεγχος αν το παιχνίδι έχει τελειώσει
+                if (checkGameEnd()) {
+                    return;
+                }
+            }
+
+            // Ενημέρωση του ονόματος της τρέχουσας ομάδας
+            updateCurrentTeam();
+
+            // Ξεκινάμε νέα λέξη και χρονόμετρο
+            chooseRandomWord();
+            timershow();
+        }
+
+        // Κατά την αρχική φόρτωση της σελίδας, εμφανίζουμε την πρώτη ομάδα και τους γύρους
+        updateCurrentTeam();
+        updateRoundsPlayed();
+        function hideButton(){
+            document.getElementById("foundButton").style.display = "none"; 
+        }
+    </script>
+</body>
+</html>
